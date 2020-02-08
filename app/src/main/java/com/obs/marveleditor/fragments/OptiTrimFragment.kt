@@ -9,8 +9,8 @@ package com.obs.marveleditor.fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.support.design.widget.BottomSheetDialogFragment
-import android.support.v7.widget.AppCompatTextView
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import androidx.appcompat.widget.AppCompatTextView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View

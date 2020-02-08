@@ -17,10 +17,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
-import android.support.v4.app.ActivityCompat
-import android.support.v7.widget.AppCompatButton
-import android.support.v7.widget.AppCompatImageView
-import android.support.v7.widget.AppCompatTextView
+import androidx.core.app.ActivityCompat
+import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.appcompat.widget.AppCompatTextView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View

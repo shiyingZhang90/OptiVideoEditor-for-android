@@ -23,13 +23,13 @@ import android.os.Environment
 import android.os.Handler
 import android.provider.MediaStore
 import android.provider.Settings
-import android.support.design.widget.BottomSheetDialogFragment
-import android.support.v4.app.ActivityCompat
-import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
-import android.support.v4.content.FileProvider
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -110,7 +110,8 @@ class OptiMasterProcessorFragment : Fragment(), OptiBaseCreatorDialogFragment.Ca
         preferences = activity!!.getSharedPreferences("fetch_permission", Context.MODE_PRIVATE)
 
         rvVideoOptions = rootView.findViewById(R.id.rvVideoOptions)!!
-        linearLayoutManager = LinearLayoutManager(activity!!.applicationContext)
+        linearLayoutManager =
+            LinearLayoutManager(activity!!.applicationContext)
         linearLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
         rvVideoOptions.layoutManager = linearLayoutManager
 

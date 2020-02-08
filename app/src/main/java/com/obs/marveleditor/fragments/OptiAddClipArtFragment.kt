@@ -10,9 +10,9 @@ package com.obs.marveleditor.fragments
 import android.content.Context
 import android.os.Bundle
 import android.os.Environment
-import android.support.design.widget.BottomSheetDialogFragment
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -63,8 +63,10 @@ class OptiAddClipArtFragment : BottomSheetDialogFragment(), OptiClipArtListener,
         rvPosition = rootView.findViewById(R.id.rvPosition)
         ivClose = rootView.findViewById(R.id.iv_close)
         ivDone = rootView.findViewById(R.id.iv_done)
-        linearLayoutManagerOne = LinearLayoutManager(activity!!.applicationContext)
-        linearLayoutManagerTwo = LinearLayoutManager(activity!!.applicationContext)
+        linearLayoutManagerOne =
+            LinearLayoutManager(activity!!.applicationContext)
+        linearLayoutManagerTwo =
+            LinearLayoutManager(activity!!.applicationContext)
 
         linearLayoutManagerOne.orientation = LinearLayoutManager.HORIZONTAL
         rvClipArt.layoutManager = linearLayoutManagerOne

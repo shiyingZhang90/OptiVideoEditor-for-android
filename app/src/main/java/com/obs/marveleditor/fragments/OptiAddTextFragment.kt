@@ -10,9 +10,9 @@ package com.obs.marveleditor.fragments
 import android.content.Context
 import android.os.Bundle
 import android.os.Environment
-import android.support.design.widget.BottomSheetDialogFragment
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -59,7 +59,8 @@ class OptiAddTextFragment : BottomSheetDialogFragment(), OptiPositionListener, O
         ivClose = rootView.findViewById(R.id.iv_close)
         ivDone = rootView.findViewById(R.id.iv_done)
         etText = rootView.findViewById(R.id.etText)
-        linearLayoutManager = LinearLayoutManager(activity!!.applicationContext)
+        linearLayoutManager =
+            LinearLayoutManager(activity!!.applicationContext)
 
         linearLayoutManager.orientation = LinearLayoutManager.HORIZONTAL
         rvPosition.layoutManager = linearLayoutManager
