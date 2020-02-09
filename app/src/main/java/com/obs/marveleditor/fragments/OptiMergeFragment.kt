@@ -43,10 +43,13 @@ class OptiMergeFragment : BottomSheetDialogFragment(), OptiDialogueHelper, OptiF
     private lateinit var ivDone: ImageView
     private lateinit var ivVideoOne: SimpleDraweeView
     private lateinit var ivVideoTwo: SimpleDraweeView
+    private lateinit var ivVideoThree: SimpleDraweeView
     private var videoFileOne: File? = null
     private var videoFileTwo: File? = null
+    private var videoFileThree: File? = null
     private var bmThumbnailOne: Bitmap? = null
     private var bmThumbnailTwo: Bitmap? = null
+    private var bmThumbnailThree: Bitmap? = null
     private var helper: OptiBaseCreatorDialogFragment.CallBacks? = null
     private var mContext: Context? = null
 
@@ -62,6 +65,7 @@ class OptiMergeFragment : BottomSheetDialogFragment(), OptiDialogueHelper, OptiF
         ivDone = rootView.findViewById(R.id.iv_done)
         ivVideoOne = rootView.findViewById(R.id.iv_video_one)
         ivVideoTwo = rootView.findViewById(R.id.iv_video_two)
+        ivVideoThree = rootView.findViewById(R.id.iv_video_three)
 
         mContext = context
 
@@ -71,18 +75,21 @@ class OptiMergeFragment : BottomSheetDialogFragment(), OptiDialogueHelper, OptiF
 
         ivDone.setOnClickListener {
 
-            if (videoFileOne != null && videoFileTwo != null) {
+            if (videoFileOne != null && videoFileTwo != null &&  videoFileThree != null) {
                 dismiss()
 
                 //output file is generated and send to video processing
                 val outputFile = OptiUtils.createVideoFile(context!!)
                 Log.v(tagName, "outputFile: ${outputFile.absolutePath}")
-
+                val videoFiles = arrayListOf<File>()
+                videoFiles.add(videoFileOne!!)
+                videoFiles.add(videoFileTwo!!)
+                videoFiles.add(videoFileThree!!)
                 OptiVideoEditor.with(context!!)
                     .setType(OptiConstant.MERGE_VIDEO)
-                    .setFile(videoFileOne!!)
-                    .setFileTwo(videoFileTwo!!)
+                    .setFiles(videoFiles)
                     .setOutputPath(outputFile.path)
+                    .setMergeNumber(3)
                     .setCallback(this)
                     .main()
 
@@ -98,6 +105,9 @@ class OptiMergeFragment : BottomSheetDialogFragment(), OptiDialogueHelper, OptiF
 
         ivVideoTwo.setOnClickListener {
             checkPermission(OptiConstant.VIDEO_MERGE_2, Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        ivVideoThree.setOnClickListener {
+            checkPermission(OptiConstant.VIDEO_MERGE_3, Manifest.permission.READ_EXTERNAL_STORAGE)
         }
     }
 
@@ -161,6 +171,24 @@ class OptiMergeFragment : BottomSheetDialogFragment(), OptiDialogueHelper, OptiF
                 }
                 return
             }
+            OptiConstant.VIDEO_MERGE_3 -> {
+                for (permission in permissions) {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(activity as Activity, permission)) {
+                        Toast.makeText(activity, "Permission Denied", Toast.LENGTH_SHORT).show()
+                    } else {
+                        if (ActivityCompat.checkSelfPermission(activity as Activity, permission) == PackageManager.PERMISSION_GRANTED) {
+                            //call the gallery intent
+                            val i = Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+                            i.setType("video/*")
+                            i.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("audio/*", "video/*"))
+                            startActivityForResult(i, OptiConstant.VIDEO_MERGE_3)
+                        } else {
+                            callPermissionSettings()
+                        }
+                    }
+                }
+                return
+            }
         }
     }
 
@@ -187,6 +215,12 @@ class OptiMergeFragment : BottomSheetDialogFragment(), OptiDialogueHelper, OptiF
             OptiConstant.VIDEO_MERGE_2 -> {
                 data?.let {
                     setFilePath(resultCode, it, OptiConstant.VIDEO_MERGE_2)
+                }
+            }
+
+            OptiConstant.VIDEO_MERGE_3 -> {
+                data?.let {
+                    setFilePath(resultCode, it, OptiConstant.VIDEO_MERGE_3)
                 }
             }
         }
@@ -229,6 +263,17 @@ class OptiMergeFragment : BottomSheetDialogFragment(), OptiDialogueHelper, OptiF
                         )
 
                         ivVideoTwo.setImageBitmap(bmThumbnailTwo)
+                    } else if (mode == OptiConstant.VIDEO_MERGE_3) {
+                        videoFileThree = File(filePath)
+                        Log.v(tagName, "videoFileThree: " + videoFileThree!!.absolutePath)
+
+                        //get thumbnail of selected video
+                        bmThumbnailThree = ThumbnailUtils.createVideoThumbnail(
+                            videoFileThree!!.absolutePath,
+                            MediaStore.Video.Thumbnails.FULL_SCREEN_KIND
+                        )
+
+                        ivVideoThree.setImageBitmap(bmThumbnailThree)
                     }
                 }
             } catch (e: Exception) {

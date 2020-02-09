@@ -23,6 +23,8 @@ class OptiVideoEditor private constructor(private val context: Context) {
     private var tagName: String = OptiVideoEditor::class.java.simpleName
     private var videoFile: File? = null
     private var videoFileTwo: File? = null
+    private var videoFileThree: File? = null
+    private var videoFiles = arrayListOf<File>()
     private var callback: OptiFFMpegCallback? = null
     private var outputFilePath = ""
     private var type: Int? = null
@@ -44,6 +46,9 @@ class OptiVideoEditor private constructor(private val context: Context) {
     private var startTime = "00:00:00"
     private var endTime = "00:00:00"
     private var audioFile: File? = null
+    private var mergeCommand = ""
+    private var mergeCommandArray = arrayListOf<String>()
+    private var postmergeCommand = ""
     //for filter
     private var filterCommand: String? = null
 
@@ -77,11 +82,21 @@ class OptiVideoEditor private constructor(private val context: Context) {
         this.videoFile = file
         return this
     }
-
     fun setFileTwo(file: File): OptiVideoEditor {
         this.videoFileTwo = file
         return this
     }
+    fun setFileThree(file: File): OptiVideoEditor {
+        this.videoFileThree = file
+        return this
+    }
+
+    fun setFiles(file: ArrayList<File>): OptiVideoEditor {
+        this.videoFiles = file
+        return this
+    }
+
+
 
     fun setAudioFile(file: File): OptiVideoEditor {
         this.audioFile = file
@@ -162,6 +177,21 @@ class OptiVideoEditor private constructor(private val context: Context) {
         return this
     }
 
+    fun setMergeNumber(Number: Int): OptiVideoEditor {
+        this.mergeCommandArray.add("-y")
+        for(x in 0 until Number){
+            this.mergeCommandArray.add("-i")
+            this.mergeCommandArray.add(videoFiles.get(x)!!.path)
+            this.mergeCommand += "[" + x.toString()+ ":v]scale=iw*min(1920/iw\\,1080/ih):ih*min(1920/iw\\,1080/ih), pad=1920:1080:(1920-iw*min(1920/iw\\,1080/ih))/2:(1080-ih*min(1920/iw\\,1080/ih))/2,setsar=1:1[v"+ x.toString() +"];"
+            this.postmergeCommand += "[v"+ x.toString()+ "]["+ x.toString() +":a]"
+        }
+        this.mergeCommand += this.postmergeCommand + "concat=n=" +Number.toString()+ ":v=1:a=1"
+        this.mergeCommandArray.addAll(listOf("-strict", "experimental", "-filter_complex",mergeCommand!!,"-ab", "48000", "-ac", "2", "-ar", "22050", "-s", "1920x1080", "-vcodec", "libx264", "-crf", "27",
+            "-q", "4", "-preset", "ultrafast", outputFilePath))
+
+        return this
+    }
+
     fun main() {
         if(type == OptiConstant.AUDIO_TRIM){
             if (audioFile == null || !audioFile!!.exists()) {
@@ -173,13 +203,15 @@ class OptiVideoEditor private constructor(private val context: Context) {
                 return
             }
         } else {
-            if (videoFile == null || !videoFile!!.exists()) {
+            if ((videoFile == null || !videoFile!!.exists()) && videoFiles == null) {
                 callback!!.onFailure(IOException("File not exists"))
                 return
             }
-            if (!videoFile!!.canRead()) {
-                callback!!.onFailure(IOException("Can't read the file. Missing permission?"))
-                return
+            if (videoFile != null) {
+                if (!videoFile!!.canRead()) {
+                    callback!!.onFailure(IOException("Can't read the file. Missing permission?"))
+                    return
+                }
             }
         }
 
@@ -206,13 +238,18 @@ class OptiVideoEditor private constructor(private val context: Context) {
                 //Clipart overlay on video - Need video file, image path, position to apply & output file
                 cmd = arrayOf("-y", "-i", videoFile!!.path, "-i", imagePath!!, "-filter_complex", position!!, "-codec:a", "copy", outputFile.path)
             }
-
+            //https://trac.ffmpeg.org/wiki/Concatenate for details
             OptiConstant.MERGE_VIDEO -> {
                 //Merge videos - Need two video file, approx video size & output file
-                cmd = arrayOf("-y", "-i", videoFile!!.path, "-i", videoFileTwo!!.path, "-strict", "experimental", "-filter_complex",
-                    "[0:v]scale=iw*min(1920/iw\\,1080/ih):ih*min(1920/iw\\,1080/ih), pad=1920:1080:(1920-iw*min(1920/iw\\,1080/ih))/2:(1080-ih*min(1920/iw\\,1080/ih))/2,setsar=1:1[v0];[1:v] scale=iw*min(1920/iw\\,1080/ih):ih*min(1920/iw\\,1080/ih), pad=1920:1080:(1920-iw*min(1920/iw\\,1080/ih))/2:(1080-ih*min(1920/iw\\,1080/ih))/2,setsar=1:1[v1];[v0][0:a][v1][1:a] concat=n=2:v=1:a=1",
-                    "-ab", "48000", "-ac", "2", "-ar", "22050", "-s", "1920x1080", "-vcodec", "libx264", "-crf", "27",
-                    "-q", "4", "-preset", "ultrafast", outputFile.path)
+
+                cmd = this.mergeCommandArray.toTypedArray();
+
+//                cmd = arrayOf("-y", "-i", videoFile!!.path, "-i", videoFileTwo!!.path,"-i", videoFileThree!!.path,"-strict", "experimental", "-filter_complex",
+//                    "[0:v]scale=iw*min(1920/iw\\,1080/ih):ih*min(1920/iw\\,1080/ih), pad=1920:1080:(1920-iw*min(1920/iw\\,1080/ih))/2:(1080-ih*min(1920/iw\\,1080/ih))/2,setsar=1:1[v0];" +
+//                    "[1:v] scale=iw*min(1920/iw\\,1080/ih):ih*min(1920/iw\\,1080/ih), pad=1920:1080:(1920-iw*min(1920/iw\\,1080/ih))/2:(1080-ih*min(1920/iw\\,1080/ih))/2,setsar=1:1[v1];" +
+//                    "[2:v] scale=iw*min(1920/iw\\,1080/ih):ih*min(1920/iw\\,1080/ih), pad=1920:1080:(1920-iw*min(1920/iw\\,1080/ih))/2:(1080-ih*min(1920/iw\\,1080/ih))/2,setsar=1:1[v2];[v0][0:a][v1][1:a][v2][2:a] concat=n=3:v=1:a=1",
+//                    "-ab", "48000", "-ac", "2", "-ar", "22050", "-s", "1920x1080", "-vcodec", "libx264", "-crf", "27",
+//                    "-q", "4", "-preset", "ultrafast", outputFile.path)
             }
 
             OptiConstant.VIDEO_PLAYBACK_SPEED -> {

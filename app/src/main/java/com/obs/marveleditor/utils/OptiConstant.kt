@@ -46,6 +46,7 @@ class OptiConstant {
         const val AUDIO_GALLERY = 103
         const val VIDEO_MERGE_1 = 104
         const val VIDEO_MERGE_2 = 105
+        const val VIDEO_MERGE_3 = 108
         const val ADD_ITEMS_IN_STORAGE = 106
         const val MAIN_VIDEO_TRIM = 107
 
